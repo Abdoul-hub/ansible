@@ -1,0 +1,21 @@
+- name: Installer et verfier le service appache
+  hosts: tp1
+  remote_user: vagrant
+  become: true
+  become_user: root
+
+  tasks:
+  - name: Update all packages to their latest version
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Install apache2
+    ansible.builtin.package:
+      name: apache2
+      state: present
+
+  - name: restart systemd service if it exists
+    service:
+      state: started
+      name: apache2.service
+
