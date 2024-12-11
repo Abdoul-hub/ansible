@@ -1,0 +1,35 @@
+---
+- name: configure web server
+  hosts: web
+  remote_user: vagrant
+  become: true
+  become_user: root
+
+  tasks:
+    - name: Install apache2 and php
+      ansible.builtin.apt:
+      update_cache: yes
+        name: "{{item}}"
+        state: present
+      loop:
+      - apache2
+      - php
+      - unzip
+      notify: Restart apache
+
+    - name: Create wordpress directory
+      ansible.builtin.file:
+        path: /var/www/html/wordpress
+        state: directory
+
+    - name: Extract wordpress zip into /var/www/html
+      ansible.builtin.unarchive:
+        src: https://fr.wordpress.org/latest-fr_FR.zip
+        dest: /var/www/html/wordpress
+        remote_src: yes
+
+  handlers:
+    - name: Restart apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted

@@ -1,0 +1,26 @@
+---
+- name: do tp5
+  hosts: tp5
+  remote_user: vagrant
+  become: true
+  become_user: root
+
+  tasks:
+    - name: install docker
+      include_tasks: ../tp3_include/tp3.yml
+
+
+    - name: Include vars from tp4.
+      ansible.builtin.include_vars:
+        file: ../tp4_include/tp4.yml
+
+    - name: check day pair and before 12 and show message
+      ansible.builtin.lineinfile:
+        path: /etc/last_changed
+        line: "{{ansible_date_time.day}} - {{ansible_date_time.hour}}"     
+        create: yes   
+
+
+  roles:
+    - geerlingguy.docker
+    - geerlingguy.clamav

@@ -1,0 +1,70 @@
+- name: Installer et verfier le service appache
+  hosts: tp3
+  remote_user: vagrant
+  become: true
+  become_user: root
+
+  tasks:
+  - name: Install and configure node1 and node2
+    ansible.builtin.apt:
+      update_cache: yes
+      name: "{{ item }}"
+      state: present
+    loop:
+      - mysql-server
+      - apache2
+    when: ansible_hostname ==  "node1" or ansible_hostname ==  "node2"
+
+  - name: Install and configure node3
+    ansible.builtin.apt:
+      update_cache: yes
+      name: "{{ item }}"
+      state: present
+    loop:
+      - git
+      - nginx
+      - cowsay  
+    when: "ansible_hostname ==  'node3'"
+
+  - name: install ufw
+    ansible.builtin.apt:
+      update_cache: yes
+      name: "ufw"
+      state: present 
+    when: "ansible_distribution ==  'Ubuntu'" 
+
+  - name: Populate service facts
+    ansible.builtin.package_facts:
+
+
+  - name: create index file if apache or nginx is installed
+    ansible.builtin.copy:
+      src: files/index.html
+      dest: /var/www/html/index.html
+    when: "'apache2' in ansible_facts.packages or 'nginx' in ansible_facts.packages"
+
+  - name: check day pair and pass 12 and show message
+    ansible.builtin.lineinfile:
+    when: "( ansible_date_time.day | int) %2 == 0 and (ansible_date_time.hour | int ) < 12"
+
+  - name: check day pair and before 12 and show message
+    ansible.builtin.lineinfile:
+      path: /etc/jour
+      line: "Bonjour depuis Ansible"
+      create: yes
+    when: "(ansible_date_time.day | int ) %2 ==0 and (ansible_date_time.hour | int )>12"
+
+  - name: check day impair and pass 12 and show message
+    ansible.builtin.lineinfile:
+      path: /etc/jour
+      line: "Bonjour depuis Ansible"
+      create: yes
+    when: "(ansible_date_time.day | int ) %2 !=0 and (ansible_date_time.hour| int )<12"
+
+  - name: check day impair and before 12 and show message
+    ansible.builtin.lineinfile:
+      path: /etc/jour
+      line: "Bonjour depuis Ansible"
+      create: yes
+    when: "(ansible_date_time.day| int ) % 2 !=0 and (ansible_date_time.hour | int )>12"
+

@@ -1,0 +1,29 @@
+- name: Installer et verfier le service appache
+  hosts: tp1
+  remote_user: vagrant
+  become: true
+  become_user: root
+
+  tasks:
+  - name: Install mysql-server
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - mysql-server
+      - apache2
+
+  - name: Populate service facts
+    ansible.builtin.package_facts:
+
+  - name: create index file for apache
+    ansible.builtin.copy:
+      src: files/index.html
+      dest: /var/www/html/index.html
+    when: "'apache2' in ansible_facts.packages"
+
+  - name: restart apache service if it exists
+    service:
+      state: started
+      name: apache2
+
